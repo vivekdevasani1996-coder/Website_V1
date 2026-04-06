@@ -753,6 +753,12 @@
             <div class="job-ttl">Article Assistant</div>
             <span class="jbadge jb-green">Full Time</span>
             <div class="job-desc">Support senior chartered accountants with day-to-day accounting tasks, preparation of financial statements, tax filings, and client documentation. Ideal for CA articleship candidates.</div>
+            <div style="margin-bottom:18px">
+              <div style="font-family:var(--font-ui);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--teal);margin-bottom:8px">Qualifications</div>
+              <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px">
+                <li style="font-family:var(--font-body);font-size:13px;color:var(--ink3);display:flex;align-items:flex-start;gap:8px"><i class="fas fa-check-circle" style="color:var(--teal);margin-top:2px;flex-shrink:0;font-size:12px"></i>CA Inter \ CMA Inter Qualified</li>
+              </ul>
+            </div>
             <button class="job-btn" onclick="document.getElementById('car-position').value='Article Assistant';document.getElementById('app-form').scrollIntoView({behavior:'smooth'})">Apply Now</button>
           </div>
 
@@ -761,6 +767,12 @@
             <div class="job-ttl">Audit Assistant</div>
             <span class="jbadge jb-blue">Full Time</span>
             <div class="job-desc">Assist the audit team in planning and executing statutory and internal audits. Responsibilities include vouching, verification, reconciliation, and preparing audit working papers.</div>
+            <div style="margin-bottom:18px">
+              <div style="font-family:var(--font-ui);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--teal);margin-bottom:8px">Qualifications</div>
+              <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px">
+                <li style="font-family:var(--font-body);font-size:13px;color:var(--ink3);display:flex;align-items:flex-start;gap:8px"><i class="fas fa-check-circle" style="color:var(--teal);margin-top:2px;flex-shrink:0;font-size:12px"></i>CA \ CMA Articleship (Completed)</li>
+              </ul>
+            </div>
             <button class="job-btn" onclick="document.getElementById('car-position').value='Audit Assistant';document.getElementById('app-form').scrollIntoView({behavior:'smooth'})">Apply Now</button>
           </div>
 
@@ -769,6 +781,13 @@
             <div class="job-ttl">Accountant</div>
             <span class="jbadge jb-green">Full Time</span>
             <div class="job-desc">Manage day-to-day bookkeeping, GST returns, TDS filing, bank reconciliations, and financial reporting. Experience with Tally or similar accounting software preferred.</div>
+            <div style="margin-bottom:18px">
+              <div style="font-family:var(--font-ui);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--teal);margin-bottom:8px">Qualifications</div>
+              <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px">
+                <li style="font-family:var(--font-body);font-size:13px;color:var(--ink3);display:flex;align-items:flex-start;gap:8px"><i class="fas fa-check-circle" style="color:var(--teal);margin-top:2px;flex-shrink:0;font-size:12px"></i>MBA / B.Com</li>
+                <li style="font-family:var(--font-body);font-size:13px;color:var(--ink3);display:flex;align-items:flex-start;gap:8px"><i class="fas fa-check-circle" style="color:var(--teal);margin-top:2px;flex-shrink:0;font-size:12px"></i>Tally</li>
+              </ul>
+            </div>
             <button class="job-btn" onclick="document.getElementById('car-position').value='Accountant';document.getElementById('app-form').scrollIntoView({behavior:'smooth'})">Apply Now</button>
           </div>
 
@@ -1528,7 +1547,16 @@ function handleCareerForm(btn) {
   // Reset previous error styles
   required.forEach(id => {
     const el = document.getElementById(id);
-    if (el) { el.style.borderColor = ''; el.style.boxShadow = ''; }
+    if (el) {
+      el.style.borderColor = ''; el.style.boxShadow = '';
+      const err = el.parentElement && el.parentElement.querySelector('.field-err');
+      if (err) err.remove();
+    }
+  });
+  // also clear phone/email extras not in required list (safety)
+  ['car-phone','car-email'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { const err = el.parentElement && el.parentElement.querySelector('.field-err'); if (err) err.remove(); }
   });
   document.getElementById('car-success').style.display = 'none';
   document.getElementById('car-error').style.display   = 'none';
@@ -1542,8 +1570,23 @@ function handleCareerForm(btn) {
 
   // Email format validation
   const carEmailEl = document.getElementById('car-email');
-  if (carEmailEl && carEmailEl.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(carEmailEl.value.trim())) {
-    markCareerFieldInvalid(carEmailEl);
+  if (carEmailEl && carEmailEl.value.trim()) {
+    const carEmailVal = carEmailEl.value.trim();
+    const validFormat = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,10}$/.test(carEmailVal);
+    const knownProviderWrongTLD = /^[a-zA-Z0-9._%+\-]+@(gmail|yahoo|hotmail|outlook|rediffmail|icloud)\./i.test(carEmailVal) &&
+      !/^[a-zA-Z0-9._%+\-]+@(gmail\.com|yahoo\.com|yahoo\.co\.in|yahoo\.co\.uk|hotmail\.com|hotmail\.co\.uk|outlook\.com|rediffmail\.com|icloud\.com)$/i.test(carEmailVal);
+    if (!validFormat || knownProviderWrongTLD) {
+      markCareerFieldInvalid(carEmailEl, knownProviderWrongTLD
+        ? 'Check your email domain — did you mean @gmail.com or @yahoo.com?'
+        : 'Enter a valid email address (e.g. name@example.com).');
+      valid = false;
+    }
+  }
+
+  // Phone validation: digits only, exactly 10
+  const carPhoneEl = document.getElementById('car-phone');
+  if (carPhoneEl && carPhoneEl.value.trim() && !/^\d{10}$/.test(carPhoneEl.value.trim())) {
+    markCareerFieldInvalid(carPhoneEl, 'Mobile number must be exactly 10 digits.');
     valid = false;
   }
 
@@ -1625,11 +1668,8 @@ function handleCareerForm(btn) {
     });
 }
 
-function markCareerFieldInvalid(el) {
-  if (!el) return;
-  el.style.borderColor = '#e74c3c';
-  el.style.boxShadow   = '0 0 0 4px rgba(231,76,60,0.12)';
-  setTimeout(() => { el.style.borderColor = ''; el.style.boxShadow = ''; }, 3000);
+function markCareerFieldInvalid(el, msg) {
+  showInputError(el, msg || 'This field is required.');
 }
 
 /* ─── EmailJS Configuration ───────────────────────────────────
@@ -1676,7 +1716,11 @@ function handleForm(btn) {
   // Reset previous error styles
   fieldIds.forEach(id => {
     const el = document.getElementById(id);
-    if (el) { el.style.borderColor = ''; el.style.boxShadow = ''; }
+    if (el) {
+      el.style.borderColor = ''; el.style.boxShadow = '';
+      const err = el.parentElement && el.parentElement.querySelector('.field-err');
+      if (err) err.remove();
+    }
   });
 
   // Required-field validation
@@ -1688,8 +1732,23 @@ function handleForm(btn) {
 
   // Email format validation
   const emailEl = document.getElementById('con-email');
-  if (emailEl && emailEl.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value.trim())) {
-    markFieldInvalid(emailEl);
+  if (emailEl && emailEl.value.trim()) {
+    const conEmailVal = emailEl.value.trim();
+    const validFormat = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,10}$/.test(conEmailVal);
+    const knownProviderWrongTLD = /^[a-zA-Z0-9._%+\-]+@(gmail|yahoo|hotmail|outlook|rediffmail|icloud)\./i.test(conEmailVal) &&
+      !/^[a-zA-Z0-9._%+\-]+@(gmail\.com|yahoo\.com|yahoo\.co\.in|yahoo\.co\.uk|hotmail\.com|hotmail\.co\.uk|outlook\.com|rediffmail\.com|icloud\.com)$/i.test(conEmailVal);
+    if (!validFormat || knownProviderWrongTLD) {
+      markFieldInvalid(emailEl, knownProviderWrongTLD
+        ? 'Check your email domain — did you mean @gmail.com or @yahoo.com?'
+        : 'Enter a valid email address (e.g. name@example.com).');
+      valid = false;
+    }
+  }
+
+  // Phone validation: digits only, exactly 10
+  const conPhoneEl = document.getElementById('con-phone');
+  if (conPhoneEl && conPhoneEl.value.trim() && !/^\d{10}$/.test(conPhoneEl.value.trim())) {
+    markFieldInvalid(conPhoneEl, 'Mobile number must be exactly 10 digits.');
     valid = false;
   }
 
@@ -1731,12 +1790,36 @@ function handleForm(btn) {
     });
 }
 
-function markFieldInvalid(el) {
+function markFieldInvalid(el, msg) {
+  showInputError(el, msg || 'This field is required.');
+}
+
+function showInputError(el, msg) {
   if (!el) return;
+  // Remove existing error for this field
+  const existing = el.parentElement && el.parentElement.querySelector('.field-err');
+  if (existing) existing.remove();
   el.style.borderColor = '#e74c3c';
   el.style.boxShadow   = '0 0 0 4px rgba(231,76,60,0.12)';
-  setTimeout(() => { el.style.borderColor = ''; el.style.boxShadow = ''; }, 3000);
+  const span = document.createElement('span');
+  span.className = 'field-err';
+  span.style.cssText = 'display:block;font-size:11.5px;color:#e74c3c;margin-top:5px;font-family:var(--font-ui);font-weight:500';
+  span.textContent = msg;
+  el.parentElement.appendChild(span);
+  setTimeout(() => {
+    el.style.borderColor = '';
+    el.style.boxShadow   = '';
+    if (span.parentElement) span.remove();
+  }, 4000);
 }
+
+// Block non-digit characters and cap at 10 on both phone fields
+['car-phone', 'con-phone'].forEach(id => {
+  const ph = document.getElementById(id);
+  if (ph) ph.addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, '').slice(0, 10);
+  });
+});
 
 
 /* ─── Tax News Filter ─── */
